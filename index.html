@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Warehouse Admin Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#090b0f;--bg2:#0e1116;--bg3:#13161e;
+  --surface:rgba(255,255,255,0.045);--surface-hover:rgba(255,255,255,0.075);
+  --border:rgba(255,255,255,0.08);--border-hover:rgba(255,255,255,0.16);
+  --text:#eef0f4;--text-muted:#737888;--text-dim:#3e4352;
+  --accent:#4f8ef7;--accent2:#7c5cf7;
+  --google:#34a853;--microsoft:#0078d4;--netsuite:#e87a1a;--other:#9b59b6;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;min-height:100vh;overflow-x:hidden;line-height:1.5;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(79,142,247,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,0.025) 1px,transparent 1px);background-size:64px 64px;pointer-events:none;z-index:0;}
+.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0;opacity:0.12;}
+.orb1{width:600px;height:600px;background:#4f8ef7;top:-200px;left:-150px;}
+.orb2{width:450px;height:450px;background:#7c5cf7;bottom:0;right:-100px;}
+.wrap{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 36px;}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:100;background:rgba(9,11,15,0.88);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);}
+.header-inner{max-width:1300px;margin:0 auto;padding:0 36px;height:68px;display:flex;align-items:center;gap:24px;}
+.logo{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.logo-text{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;letter-spacing:-0.3px;}
+.logo-text span{color:var(--accent);}
+.search-wrap{flex:1;max-width:440px;position:relative;}
+.search-wrap svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--text-muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;}
+#searchInput{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:11px 16px 11px 44px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color 0.2s,background 0.2s;}
+#searchInput::placeholder{color:var(--text-dim);font-size:15px;}
+#searchInput:focus{border-color:rgba(79,142,247,0.4);background:var(--surface-hover);}
+.last-updated{font-size:12px;color:var(--text-dim);flex-shrink:0;}
+
+/* HERO */
+.hero{padding:52px 0 32px;text-align:center;}
+.hero-tag{display:inline-flex;align-items:center;gap:7px;background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.2);border-radius:999px;padding:6px 16px;font-size:12px;color:var(--accent);letter-spacing:0.6px;text-transform:uppercase;font-weight:600;margin-bottom:20px;}
+.hero-tag::before{content:'';width:7px;height:7px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.75);}}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(32px,5vw,56px);font-weight:800;line-height:1.08;letter-spacing:-1.5px;margin-bottom:14px;background:linear-gradient(135deg,#fff 0%,#6b718c 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero p{color:var(--text-muted);font-size:17px;max-width:440px;margin:0 auto 32px;line-height:1.65;}
+
+/* STATS */
+.stats-bar{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:16px;overflow:hidden;max-width:540px;margin:0 auto 44px;}
+.stat-item{flex:1;background:var(--bg2);padding:16px 20px;text-align:center;}
+.stat-num{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--text);}
+.stat-label{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.6px;margin-top:3px;}
+
+/* VIEW TOGGLE */
+.view-toggle-wrap{display:flex;justify-content:center;margin-bottom:32px;}
+.view-toggle{display:inline-flex;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:6px;gap:6px;}
+.view-btn{display:flex;align-items:center;gap:10px;padding:13px 24px;border-radius:11px;border:none;background:transparent;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.view-btn:hover{background:var(--surface-hover);color:var(--text);}
+.view-btn.active{background:linear-gradient(135deg,rgba(79,142,247,0.18),rgba(124,92,247,0.18));color:var(--text);border:1px solid rgba(79,142,247,0.3);}
+.view-btn .vb-icon{font-size:20px;line-height:1;}
+.view-btn .vb-label{font-size:15px;font-weight:600;display:block;}
+.view-btn .vb-sub{font-size:11px;color:var(--text-dim);display:block;line-height:1;margin-top:2px;}
+.view-btn.active .vb-sub{color:rgba(79,142,247,0.7);}
+
+/* PLATFORM PILLS */
+.platform-pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;}
+.plat-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.plat-btn:hover{border-color:var(--border-hover);color:var(--text);background:var(--surface-hover);}
+.plat-btn.active{border-color:var(--accent);color:#fff;background:rgba(79,142,247,0.15);}
+.plat-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+
+/* PROCESS BUTTONS — shown only in By Process view */
+.process-filter-wrap{
+  margin-bottom:36px;
+  animation:fadeUp 0.3s ease both;
+}
+.process-filter-label{
+  text-align:center;font-size:12px;color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:0.8px;font-weight:600;
+  margin-bottom:14px;
+}
+.process-btns{
+  display:flex;gap:10px;flex-wrap:wrap;justify-content:center;
+}
+.proc-btn{
+  display:flex;align-items:center;gap:9px;
+  padding:12px 22px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text-muted);
+  font-family:'DM Sans',sans-serif;
+  font-size:15px;font-weight:500;
+  cursor:pointer;
+  transition:all 0.22s;
+  min-width:120px;
+  justify-content:center;
+}
+.proc-btn:hover{border-color:var(--border-hover);color:var(--text);background:var(--surface-hover);transform:translateY(-1px);}
+.proc-btn.active{
+  background:linear-gradient(135deg,rgba(79,142,247,0.2),rgba(124,92,247,0.15));
+  border-color:rgba(79,142,247,0.4);
+  color:var(--text);
+}
+.proc-btn .pb-icon{font-size:18px;line-height:1;}
+.proc-btn .pb-count{
+  font-size:11px;color:var(--text-dim);
+  background:rgba(255,255,255,0.06);
+  border-radius:999px;padding:2px 7px;
+  margin-left:4px;
+}
+.proc-btn.active .pb-count{color:rgba(79,142,247,0.8);}
+
+/* SECTION HEADER */
+.section-block{margin-bottom:52px;animation:fadeUp 0.35s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.section-header{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+.section-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.12);}
+.section-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;letter-spacing:-0.3px;}
+.section-count{font-size:13px;color:var(--text-dim);background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:4px 12px;}
+.section-line{flex:1;height:1px;background:var(--border);}
+.subsection-label{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin:22px 0 14px;font-weight:600;}
+
+/* CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px;}
+.tool-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;display:flex;flex-direction:column;gap:14px;transition:all 0.25s;position:relative;overflow:hidden;animation:fadeUp 0.35s ease both;}
+.tool-card:hover{border-color:var(--border-hover);background:var(--surface-hover);transform:translateY(-3px);}
+.tool-card[data-platform="Google"]:hover{border-color:rgba(52,168,83,0.3);}
+.tool-card[data-platform="Microsoft"]:hover{border-color:rgba(0,120,212,0.3);}
+.tool-card[data-platform="NetSuite"]:hover{border-color:rgba(232,122,26,0.3);}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.card-name{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;letter-spacing:-0.2px;line-height:1.3;flex:1;}
+.badges{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;}
+.badge{font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;padding:4px 10px;border-radius:999px;border:1px solid;}
+.badge-google{color:var(--google);border-color:rgba(52,168,83,0.25);background:rgba(52,168,83,0.08);}
+.badge-microsoft{color:var(--microsoft);border-color:rgba(0,120,212,0.25);background:rgba(0,120,212,0.08);}
+.badge-netsuite{color:var(--netsuite);border-color:rgba(232,122,26,0.25);background:rgba(232,122,26,0.08);}
+.badge-other{color:var(--other);border-color:rgba(155,89,182,0.25);background:rgba(155,89,182,0.08);}
+.card-desc{font-size:14px;color:var(--text-muted);line-height:1.65;flex:1;}
+.card-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--text-dim);}
+.meta-tag{display:flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:3px 9px;}
+.card-footer{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);}
+.open-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px 20px;border-radius:12px;border:1px solid rgba(79,142,247,0.3);background:rgba(79,142,247,0.08);color:var(--accent);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;text-decoration:none;cursor:pointer;transition:all 0.2s;letter-spacing:0.1px;}
+.open-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;transform:translateY(-1px);}
+.open-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+
+/* LOADING / STATES */
+.loading-wrap{text-align:center;padding:90px 20px;}
+.spinner{width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 18px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{color:var(--text-muted);font-size:15px;}
+.config-banner{background:rgba(232,122,26,0.07);border:1px solid rgba(232,122,26,0.2);border-radius:16px;padding:18px 22px;margin-bottom:32px;display:flex;align-items:flex-start;gap:14px;font-size:14px;color:#d4894e;}
+.config-banner strong{font-weight:600;color:#f0a050;display:block;margin-bottom:4px;font-size:15px;}
+.config-banner code{background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-family:monospace;font-size:12px;color:var(--text-muted);}
+.no-results{text-align:center;padding:70px 20px;color:var(--text-dim);}
+.no-results .nr-icon{font-size:40px;margin-bottom:14px;}
+.no-results p{font-size:16px;}
+.error-msg{background:rgba(228,72,72,0.07);border:1px solid rgba(228,72,72,0.2);border-radius:16px;padding:24px;text-align:center;color:#e44848;font-size:15px;}
+
+footer{border-top:1px solid var(--border);padding:28px 0;margin-top:64px;text-align:center;font-size:13px;color:var(--text-dim);}
+
+@media(max-width:680px){
+  .wrap,.header-inner{padding:0 16px;}
+  .view-btn .vb-sub{display:none;}
+  .view-btn{padding:11px 14px;gap:7px;}
+  .cards-grid{grid-template-columns:1fr;}
+  .last-updated{display:none;}
+  .hero h1{font-size:30px;}
+  .proc-btn{min-width:100px;padding:10px 16px;font-size:14px;}
+}
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🏭</div>
+      <div class="logo-text">Warehouse <span>Admin</span></div>
+    </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search tools, processes, keywords…" autocomplete="off">
+    </div>
+    <div class="last-updated" id="lastUpdated"></div>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-tag">Warehouse Operations</div>
+    <h1>Your Process<br>Command Centre</h1>
+    <p>All tools, imports, and workflows in one place. Click any card to open.</p>
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-num" id="stat-tools">—</div><div class="stat-label">Tools</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-processes">—</div><div class="stat-label">Processes</div></div>
+      <div class="stat-item"><div class="stat-num" id="stat-platforms">—</div><div class="stat-label">Platforms</div></div>
+    </div>
+  </div>
+
+  <!-- VIEW TOGGLE -->
+  <div class="view-toggle-wrap">
+    <div class="view-toggle">
+      <button class="view-btn active" onclick="setView('process',this)">
+        <span class="vb-icon">📦</span>
+        <span><span class="vb-label">By Process</span><span class="vb-sub">Filter by workflow</span></span>
+      </button>
+      <button class="view-btn" onclick="setView('platform',this)">
+        <span class="vb-icon">🖥️</span>
+        <span><span class="vb-label">By Platform</span><span class="vb-sub">Google · Microsoft · NetSuite</span></span>
+      </button>
+      <button class="view-btn" onclick="setView('all',this)">
+        <span class="vb-icon">⊞</span>
+        <span><span class="vb-label">All Tools</span><span class="vb-sub">See everything</span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- PLATFORM FILTER -->
+  <div class="platform-pills" id="platformPills">
+    <button class="plat-btn active" onclick="setPlatform('all',this)"><span class="plat-dot" style="background:#737888"></span>All Platforms</button>
+    <button class="plat-btn" onclick="setPlatform('Google',this)"><span class="plat-dot" style="background:var(--google)"></span>Google</button>
+    <button class="plat-btn" onclick="setPlatform('Microsoft',this)"><span class="plat-dot" style="background:var(--microsoft)"></span>Microsoft</button>
+    <button class="plat-btn" onclick="setPlatform('NetSuite',this)"><span class="plat-dot" style="background:var(--netsuite)"></span>NetSuite</button>
+    <button class="plat-btn" onclick="setPlatform('Other',this)"><span class="plat-dot" style="background:var(--other)"></span>Other</button>
+  </div>
+
+  <!-- PROCESS BUTTONS — only in By Process view -->
+  <div class="process-filter-wrap" id="processFilterWrap" style="display:none">
+    <div class="process-filter-label">Select a process to filter</div>
+    <div class="process-btns" id="processBtns"></div>
+  </div>
+
+  <!-- CONFIG BANNER -->
+  <div class="config-banner" id="configBanner" style="display:none">
+    <span style="font-size:24px;flex-shrink:0">🔗</span>
+    <div>
+      <strong>Connect your Google Sheet</strong>
+      Open this HTML file in a text editor and replace <code>https://docs.google.com/spreadsheets/d/e/2PACX-1vR4Ity-wnSAstMWtMFrcLHcoFMfLlp9Sq13jBe2fXbI032oIvCskIjeopNP8TLK5AaofDO_ixtKqYr8/pub?gid=0&single=true&output=csv</code> with your published CSV link. Save and reopen.
+    </div>
+  </div>
+
+  <div id="contentArea">
+    <div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Loading portal data…</div></div>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">Warehouse Admin Portal &nbsp;·&nbsp; Data from Google Sheets &nbsp;·&nbsp; Refresh page for latest updates</div>
+</footer>
+
+<script>
+// ============================================================
+// CONFIGURATION — paste your published Google Sheet CSV URL here
+// File → Share → Publish to web → Sheet1 → CSV → Copy link
+// ============================================================
+const SHEET_CSV_URL = 'YOUR_GOOGLE_SHEET_CSV_URL';
+
+// ============================================================
+// SAMPLE DATA — replace once sheet is connected
+// ============================================================
+const SAMPLE_DATA = [
+  {Process:'Delivery',Section:'Monitoring','Tool Name':'SPX Monitoring',Description:'Track live delivery statuses, scheduled pickups, and recipient information.',Link:'https://docs.google.com/spreadsheets','Link Label':'Open Sheet','Who Can Use':'All',Platform:'Google'},
+  {Process:'Delivery',Section:'Issues','Tool Name':'Delivery Issues Tracker',Description:'Log and manage delivery exceptions. Used to prepare CSV import into NetSuite.',Link:'https://docs.google.com/spreadsheets','Link Label':'Open Sheet','Who Can Use':'Admin',Platform:'Google'},
+  {Process:'Distribution',Section:'Checker','Tool Name':'Checker — Distribution',Description:'Verify SKU, UPC codes, retail prices, and vendor article numbers before dispatch.',Link:'https://docs.google.com/spreadsheets','Link Label':'Open Sheet','Who Can Use':'Warehouse',Platform:'Google'},
+  {Process:'HR',Section:'Attendance','Tool Name':'Attendance Logger',Description:'Record and review daily staff attendance. Includes validation and consolidated dashboard.',Link:'https://docs.google.com/spreadsheets','Link Label':'Open Sheet','Who Can Use':'Admin',Platform:'Google'},
+  {Process:'Inventory',Section:'Stock Updates','Tool Name':'NetSuite Stock CSV Import',Description:'Import bulk stock level updates into NetSuite WMS via CSV template.',Link:'https://system.netsuite.com','Link Label':'Open NetSuite','Who Can Use':'Admin',Platform:'NetSuite'},
+  {Process:'Inventory',Section:'Receiving','Tool Name':'GRN Entry Form',Description:'Create Goods Received Notes and update inbound stock records in the WMS.',Link:'https://system.netsuite.com','Link Label':'Open NetSuite','Who Can Use':'Warehouse',Platform:'NetSuite'},
+  {Process:'Reporting',Section:'Operations','Tool Name':'Daily Ops Report',Description:'View and share the daily warehouse operations summary report.',Link:'https://docs.google.com/spreadsheets','Link Label':'Open Report','Who Can Use':'All',Platform:'Google'},
+  {Process:'Reporting',Section:'Finance','Tool Name':'Invoice Tracker',Description:'Track outstanding invoices and payment statuses across the organisation.',Link:'https://office.com','Link Label':'Open File','Who Can Use':'Admin',Platform:'Microsoft'},
+  {Process:'Purchasing',Section:'Orders','Tool Name':'PO Template',Description:'Raise and track purchase orders. Submit via shared OneDrive folder.',Link:'https://onedrive.live.com','Link Label':'Open OneDrive','Who Can Use':'Admin',Platform:'Microsoft'},
+];
+
+// ============================================================
+
+let allData = [];
+let activeView = 'process';
+let activePlatform = 'all';
+let activeProcess = 'all';
+let searchQuery = '';
+
+const PROCESS_ICONS = {Delivery:'🚚',Distribution:'📦',HR:'👥',Inventory:'🗂️',Reporting:'📊',Finance:'💰',Operations:'⚙️',WMS:'🏭',Purchasing:'🛒'};
+const PLATFORM_ICONS = {Google:'🟢',Microsoft:'🔵',NetSuite:'🟠',Other:'🟣'};
+
+function pIcon(p){return PROCESS_ICONS[p]||'📋';}
+function platIcon(p){return PLATFORM_ICONS[p]||'⚪';}
+function badgeClass(platform){
+  const p=(platform||'').toLowerCase();
+  if(p==='google') return 'badge-google';
+  if(p==='microsoft') return 'badge-microsoft';
+  if(p==='netsuite') return 'badge-netsuite';
+  return 'badge-other';
+}
+
+function getFiltered(){
+  return allData.filter(row=>{
+    const pf=(row.Platform||'').trim();
+    const proc=(row.Process||'').trim();
+    const okPlatform = activePlatform==='all'||pf.toLowerCase()===activePlatform.toLowerCase();
+    const okProcess = activeView!=='process'||activeProcess==='all'||proc===activeProcess;
+    const q=searchQuery.toLowerCase();
+    const okSearch=!q||(row['Tool Name']||'').toLowerCase().includes(q)||(row.Process||'').toLowerCase().includes(q)||(row.Section||'').toLowerCase().includes(q)||(row.Description||'').toLowerCase().includes(q)||(row.Platform||'').toLowerCase().includes(q);
+    return okPlatform&&okProcess&&okSearch;
+  });
+}
+
+function cardHTML(tool,delay){
+  const platform=tool.Platform||'Other';
+  const link=tool.Link||'#';
+  const label=tool['Link Label']||'Open';
+  const who=tool['Who Can Use']||'';
+  const section=tool.Section||'';
+  return `<div class="tool-card" data-platform="${platform}" style="animation-delay:${delay}ms">
+    <div class="card-top">
+      <div class="card-name">${tool['Tool Name']||'Untitled'}</div>
+      <div class="badges"><span class="badge ${badgeClass(platform)}">${platform}</span></div>
+    </div>
+    <div class="card-desc">${tool.Description||'No description provided.'}</div>
+    <div class="card-meta">
+      ${section?`<span class="meta-tag">📂 ${section}</span>`:''}
+      ${who?`<span class="meta-tag">👤 ${who}</span>`:''}
+    </div>
+    <div class="card-footer">
+      <a class="open-btn" href="${link}" target="_blank" rel="noopener">
+        ${label}
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+  </div>`;
+}
+
+function groupBy(data,key){
+  const map={};
+  data.forEach(row=>{const k=row[key]||'Other';if(!map[k])map[k]=[];map[k].push(row);});
+  return map;
+}
+
+function renderProcessButtons(){
+  // Build process buttons from ALL data (not filtered) so counts reflect platform filter
+  const platformFiltered = allData.filter(row=>{
+    const pf=(row.Platform||'').trim();
+    return activePlatform==='all'||pf.toLowerCase()===activePlatform.toLowerCase();
+  });
+  const byProc = groupBy(platformFiltered,'Process');
+  const wrap = document.getElementById('processFilterWrap');
+  const btns = document.getElementById('processBtns');
+
+  const processes = Object.keys(byProc).sort();
+  let html = `<button class="proc-btn ${activeProcess==='all'?'active':''}" onclick="setProcess('all',this)">
+    <span class="pb-icon">⊞</span> All<span class="pb-count">${platformFiltered.length}</span>
+  </button>`;
+  processes.forEach(proc=>{
+    const count=byProc[proc].length;
+    html+=`<button class="proc-btn ${activeProcess===proc?'active':''}" onclick="setProcess('${proc}',this)">
+      <span class="pb-icon">${pIcon(proc)}</span> ${proc}<span class="pb-count">${count}</span>
+    </button>`;
+  });
+  btns.innerHTML=html;
+  wrap.style.display='block';
+}
+
+function renderContent(){
+  const data=getFiltered();
+  const content=document.getElementById('contentArea');
+  if(data.length===0){
+    content.innerHTML=`<div class="no-results"><div class="nr-icon">🔍</div><p>No tools found. Try a different search or filter.</p></div>`;
+    return;
+  }
+
+  let html='';let ci=0;
+
+  if(activeView==='process'){
+    // Group by Process then Section
+    const byProc=groupBy(data,'Process');
+    Object.entries(byProc).forEach(([proc,rows])=>{
+      const bySect=groupBy(rows,'Section');
+      html+=`<div class="section-block">
+        <div class="section-header">
+          <div class="section-icon">${pIcon(proc)}</div>
+          <div class="section-title">${proc}</div>
+          <div class="section-count">${rows.length} tool${rows.length!==1?'s':''}</div>
+          <div class="section-line"></div>
+        </div>`;
+      Object.entries(bySect).forEach(([sect,tools])=>{
+        html+=`<div class="subsection-label">${sect}</div><div class="cards-grid">`;
+        tools.forEach(t=>{html+=cardHTML(t,(ci%8)*55);ci++;});
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+    });
+
+  } else if(activeView==='platform'){
+    const byPlat=groupBy(data,'Platform');
+    Object.entries(byPlat).forEach(([plat,rows])=>{
+      const byProc=groupBy(rows,'Process');
+      html+=`<div class="section-block">
+        <div class="section-header">
+          <div class="section-icon">${platIcon(plat)}</div>
+          <div class="section-title">${plat}</div>
+          <div class="section-count">${rows.length} tool${rows.length!==1?'s':''}</div>
+          <div class="section-line"></div>
+        </div>`;
+      Object.entries(byProc).forEach(([proc,tools])=>{
+        html+=`<div class="subsection-label">${pIcon(proc)} ${proc}</div><div class="cards-grid">`;
+        tools.forEach(t=>{html+=cardHTML(t,(ci%8)*55);ci++;});
+        html+=`</div>`;
+      });
+      html+=`</div>`;
+    });
+
+  } else {
+    html=`<div class="cards-grid">`;
+    data.forEach((t,i)=>{html+=cardHTML(t,(i%8)*55);});
+    html+=`</div>`;
+  }
+
+  content.innerHTML=html;
+}
+
+function render(){
+  if(activeView==='process'){
+    renderProcessButtons();
+  } else {
+    document.getElementById('processFilterWrap').style.display='none';
+    activeProcess='all';
+  }
+  renderContent();
+}
+
+function setView(view,btn){
+  activeView=view;
+  activeProcess='all';
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function setPlatform(pf,btn){
+  activePlatform=pf;
+  // reset process selection when platform changes
+  activeProcess='all';
+  document.querySelectorAll('.plat-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function setProcess(proc,btn){
+  activeProcess=proc;
+  document.querySelectorAll('.proc-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderContent();
+}
+
+function parseCSV(text){
+  const lines=text.trim().split('\n');
+  if(lines.length<2) return [];
+  const headers=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  return lines.slice(1).map(line=>{
+    const vals=[];let cur='',inQ=false;
+    for(let c of line){if(c==='"'){inQ=!inQ;}else if(c===','&&!inQ){vals.push(cur);cur='';}else cur+=c;}
+    vals.push(cur);
+    const obj={};
+    headers.forEach((h,i)=>{obj[h]=(vals[i]||'').trim();});
+    return obj;
+  }).filter(r=>r['Tool Name']||r.Process);
+}
+
+function updateStats(data){
+  document.getElementById('stat-tools').textContent=data.length;
+  document.getElementById('stat-processes').textContent=new Set(data.map(r=>r.Process)).size;
+  document.getElementById('stat-platforms').textContent=new Set(data.map(r=>r.Platform)).size;
+}
+
+async function loadData(){
+  if(!SHEET_CSV_URL||SHEET_CSV_URL==='YOUR_GOOGLE_SHEET_CSV_URL'){
+    document.getElementById('configBanner').style.display='flex';
+    allData=SAMPLE_DATA;
+    updateStats(allData);
+    document.getElementById('lastUpdated').textContent='Sample data';
+    render();
+    return;
+  }
+  try{
+    const res=await fetch(SHEET_CSV_URL);
+    if(!res.ok) throw new Error('fetch failed');
+    const text=await res.text();
+    allData=parseCSV(text);
+    if(allData.length===0) throw new Error('empty');
+    updateStats(allData);
+    document.getElementById('lastUpdated').textContent='Updated '+new Date().toLocaleTimeString();
+    render();
+  } catch(e){
+    document.getElementById('contentArea').innerHTML=`<div class="error-msg">⚠️ Could not load data from Google Sheet.<br>Check the URL and make sure the sheet is published as CSV.<br><br><small>Showing sample data as fallback.</small></div>`;
+    allData=SAMPLE_DATA;
+    setTimeout(()=>{updateStats(allData);render();},2200);
+  }
+}
+
+document.getElementById('searchInput').addEventListener('input',e=>{
+  searchQuery=e.target.value;
+  render();
+});
+
+loadData();
+</script>
+</body>
+</html>
